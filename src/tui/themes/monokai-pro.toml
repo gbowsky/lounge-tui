@@ -1,0 +1,24 @@
+# monokai-pro.toml
+# Source palette: Monokai Pro (https://monokai.pro)
+shadow = false
+borders = "simple"
+
+[colors]
+background = "#2D2A2E"
+shadow     = ["#000000", "black"]
+view       = "#363339"
+
+primary    = ["#FCFCFA"]
+secondary  = "#FFD866"
+tertiary   = "#727072"
+
+title_primary   = "#FF6188"
+title_secondary = "#AB9DF2"
+
+highlight          = "#78DCE8"
+highlight_inactive = "#FC9867"
+
+[styles.highlight]
+effects = []
+front = "#78DCE8"
+back = "#2D2A2E"

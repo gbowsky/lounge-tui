@@ -1,0 +1,79 @@
+app_name = "IBI Lounge"
+
+welcome = "Добро пожаловать в IBI Lounge"
+grades_setup = "Настройка оценок"
+grades_setup_detailed = "Укажите данные необходимые для получения оценок"
+today = "Сегодня"
+unknown = "Неизвестно"
+online = "Онлайн"
+
+[errors]
+some = "Произошла ошибка: %{e}"
+grades = "Произошла ошибка при получении оценок: %{e}"
+schedules = "Произошла ошибка при получении расписания: %{e}"
+
+[sections]
+schedules = "Расписание"
+grades = "Оценки"
+settings = "Настройки"
+
+[actions]
+next = "Далее"
+back = "Назад"
+cancel = "Отмена"
+yes = "Да"
+no = "Нет"
+apply = "Применить"
+close = "Закрыть"
+specify_group = "Указать группу"
+specify_theme = "Указать тему"
+specify_level_group = "Указать уровень образования и группу"
+specify_grades_data = "Указать данные для получения оценок"
+change_date = "Сменить дату"
+exit = "Выйти"
+
+[prompts]
+specify_group = "Укажите группу"
+specify_level = "Укажите уровень образования"
+specify_date = "Укажите дату"
+specify_theme = "Укажите тему"
+enter_pin = "Введите ПИН код"
+enter_last_name = "Введите фамилию"
+setup_grades = "Хотите ли вы указать данные для получения оценок?"
+
+[grades]
+passed = "Зачтено"
+failed = "Не зачтено"
+
+[grades_type]
+gov_exam = "Гос. экзамен"
+exam = "Экзамен"
+offline_course_work = "Курсовая (очно)"
+online_course_work = "Курсовая (заочно)"
+subject_report = "Зачёт"
+subject_report_with_grade = "Диф. зачёт"
+unknown = "Неизвестно"
+
+[grades_grade]
+failed = "Не зачтено"
+passed = "Зачтено"
+absence = "Не явился"
+not_admitted = "Недопуск"
+2 = "2"
+3 = "3"
+4 = "4"
+5 = "5"
+unknown = "Неизвестно"
+
+[schedules]
+today = "Сегодня"
+change_date = "Сменить дату"
+
+[schedules_type]
+lecture = "Лекция"
+practice = "Практика"
+meeting = "Собрание"
+exam = "Экзамен"
+subject_report = "Зачёт"
+subject_report_with_grade = "Диф. зачёт"
+unknown = "Неизвестно"

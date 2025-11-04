@@ -1,0 +1,24 @@
+# monokai.toml
+# Source palette: Monokai (classic)
+shadow = true
+borders = "simple"
+
+[colors]
+background = "#272822"
+shadow     = ["#000000", "black"]
+view       = "#2e2e2e"
+
+primary    = ["#F8F8F2"]     # foreground
+secondary  = "#E6DB74"        # soft yellow
+tertiary   = "#75715E"        # comments/muted
+
+title_primary   = "#F92672"   # pink
+title_secondary = "#AE81FF"   # purple
+
+highlight          = "#66D9EF" # cyan
+highlight_inactive = "#FD971F" # orange
+
+[styles.highlight]
+effects = []
+front = "#66D9EF"
+back = "#272822"

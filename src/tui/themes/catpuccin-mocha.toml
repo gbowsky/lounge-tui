@@ -1,0 +1,23 @@
+# catppuccin-mocha.toml
+shadow = false
+borders = "simple"
+
+[colors]
+background = "#1e1e2e"
+shadow     = ["#000000", "black"]
+view       = "#313244"
+
+primary    = ["#cdd6f4"]
+secondary  = "#bac2de"
+tertiary   = "#a6adc8"
+
+title_primary   = "#b4befe"
+title_secondary = "#f9e2af"
+
+highlight          = "#89dceb"
+highlight_inactive = "#7f849c"
+
+[styles.highlight]
+effects = []
+front = "#89dceb"
+back = "#1e1e2e"

@@ -1,0 +1,23 @@
+# catppuccin-latte.toml
+shadow = false
+borders = "simple"
+
+[colors]
+background = "#eff1f5"
+shadow     = ["#000000", "black"]
+view       = "#e6e9ef"
+
+primary    = ["#4c4f69"]
+secondary  = "#5c5f77"
+tertiary   = "#6c6f85"
+
+title_primary   = "#7287fd"
+title_secondary = "#fe640b"
+
+highlight          = "#04a5e5"
+highlight_inactive = "#8c8fa1"
+
+[styles.highlight]
+effects = []
+front = "#04a5e5"
+back = "#eff1f5"
