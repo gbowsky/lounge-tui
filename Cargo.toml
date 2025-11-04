@@ -26,11 +26,19 @@ confy = "2.0.0"
 cursive = { version = "0.21.1", features = ["toml"]}
 cursive-async-view = "0.8.0"
 regex = "1.12.2"
-reqwest = "0.12.24"
+reqwest = { version = "0.12", default-features = false, features = [
+  "rustls-tls",
+  "http2",
+  "json",
+  "gzip",
+  "brotli",
+  "deflate",
+  "charset"
+]}
 scraper = "0.24.0"
 serde = "1.0.228"
 serde_derive = "1.0.228"
-tokio = { version = "1.48.0", features = ["full"] }
+tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros"] }
 open = "5.3.2"
 cursive_calendar_view = "0.9.0"
 rust-i18n = "3.1.5"
