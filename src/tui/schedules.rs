@@ -1,7 +1,5 @@
 use crate::{
-    LoungeConfig,
-    requests::{self},
-    tui::{self, setup},
+    config, requests::{self}, tui::{self, setup}
 };
 use chrono::{Days, TimeZone, Utc};
 use cursive::view::Nameable;
@@ -23,7 +21,7 @@ fn schedules_additional_type_to_text(text: &str) -> String {
 
 pub fn schedules_view() -> NamedView<Dialog> {
     let mut schedules_list = LinearLayout::vertical();
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
     let date = Utc.timestamp(cfg.selected_date, 0);
     let date_from_formatted = date.format("%d.%m.%Y").to_string();
     let date_to = date.checked_add_days(Days::new(7)).unwrap();
@@ -127,7 +125,7 @@ pub fn schedules_view() -> NamedView<Dialog> {
                     }))
                     .child(TextView::new(" "))
                     .child(Button::new(t!("schedules.today"), |s| {
-                        let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+                        let mut cfg = config::get_config().unwrap();
                         cfg.selected_date = Utc::now().timestamp();
                         confy::store("lounge-tui", None, cfg).unwrap();
                         tui::main_screen(s);

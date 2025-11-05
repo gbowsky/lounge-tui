@@ -6,8 +6,8 @@ use cursive::{
 };
 use tokio::runtime::Runtime;
 
+use crate::config;
 use crate::{
-    LoungeConfig,
     requests::{
         self,
         grades::{GradeResult, GradeType},
@@ -29,7 +29,7 @@ fn grade_grade_to_string(grade: &GradeResult) -> String {
 
 pub fn grades_view() -> NamedView<Dialog> {
     let mut semester_list = LinearLayout::vertical();
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
     let (pin, last_name) = (cfg.pin, cfg.last_name);
     let rt = Runtime::new().unwrap();
     let grades_result = rt.block_on(requests::get_grades(&pin, &last_name));

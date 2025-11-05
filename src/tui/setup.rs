@@ -14,9 +14,10 @@ use cursive::{
 use cursive_calendar_view::{CalendarView, EnglishLocale, ViewMode};
 use tokio::runtime::Runtime;
 
+use crate::config;
 use crate::tui::schedules;
 use crate::tui::{self};
-use crate::{LoungeConfig, requests};
+use crate::{requests};
 use rust_i18n::t;
 
 rust_i18n::i18n!("locales");
@@ -35,7 +36,7 @@ pub fn load_theme(s: &mut Cursive, theme: &u8) {
 }
 
 pub fn select_theme(s: &mut Cursive) {
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
 
     let select = SelectView::new()
         .h_align(HAlign::Center)
@@ -48,7 +49,7 @@ pub fn select_theme(s: &mut Cursive) {
             load_theme(s, item);
         })
         .on_submit(| s: &mut Cursive, item: &u8 | {
-            let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+            let mut cfg = config::get_config().unwrap();
             cfg.theme = *item;
             let _ = confy::store("lounge-tui", None, cfg);
             s.pop_layer();
@@ -62,7 +63,7 @@ pub fn select_theme(s: &mut Cursive) {
 }
 
 pub fn select_date(s: &mut Cursive) {
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
 
     let mut calendar = CalendarView::<Utc, EnglishLocale>::new(
         Utc.timestamp_opt(cfg.selected_date, 0).unwrap().date(),
@@ -74,7 +75,7 @@ pub fn select_date(s: &mut Cursive) {
     calendar.set_show_iso_weeks(true);
 
     calendar.set_on_submit(move |siv: &mut Cursive, date: &Date<Utc>| {
-        let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+        let mut cfg = config::get_config().unwrap();
         cfg.selected_date = Date::<Utc>::from(*date)
             .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap())
             .unwrap()
@@ -122,7 +123,7 @@ pub fn some_error(s: &mut Cursive, e: String) {
 }
 
 fn level_submit(s: &mut Cursive, id: &str) {
-    let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let mut cfg = config::get_config().unwrap();
     cfg.level_id = id.to_string();
     confy::store("lounge-tui", None, cfg).unwrap();
 
@@ -131,7 +132,7 @@ fn level_submit(s: &mut Cursive, id: &str) {
 }
 
 fn setup_group(s: &mut Cursive) {
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
     let rt: Runtime = Runtime::new().unwrap();
     let groups_result = rt.block_on(requests::get_groups(&cfg.level_id));
 
@@ -157,7 +158,7 @@ fn setup_group(s: &mut Cursive) {
 }
 
 fn group_submit(s: &mut Cursive, id: &str) {
-    let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let mut cfg = config::get_config().unwrap();
     cfg.group_id = id.to_string();
     cfg.setup_passed = true;
     confy::store("lounge-tui", None, cfg).unwrap();
@@ -188,8 +189,8 @@ pub fn level_chooser(s: &mut Cursive) {
             let mut select = SelectView::<String>::new()
                 .h_align(HAlign::Center)
                 .autojump()
-                .on_submit(|s, v: &str| {
-                    let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+                .on_submit(|s: &mut Cursive, v: &str| {
+                    let mut cfg = config::get_config().unwrap();
                     cfg.level_id = v.to_string();
                     confy::store("lounge-tui", None, cfg).unwrap();
                     s.pop_layer();
@@ -211,7 +212,7 @@ pub fn level_chooser(s: &mut Cursive) {
 }
 
 pub fn group_chooser(s: &mut Cursive) {
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
     let rt: Runtime = Runtime::new().unwrap();
     let groups_result = rt.block_on(requests::get_groups(&cfg.level_id));
 
@@ -221,7 +222,7 @@ pub fn group_chooser(s: &mut Cursive) {
                 .h_align(HAlign::Center)
                 .autojump()
                 .on_submit(|s, v: &str| {
-                    let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+                    let mut cfg = config::get_config().unwrap();
                     cfg.group_id = v.to_string();
                     confy::store("lounge-tui", None, cfg).unwrap();
                     s.pop_layer();
@@ -243,7 +244,7 @@ pub fn group_chooser(s: &mut Cursive) {
 
 pub fn grades_settings(s: &mut Cursive) {
     s.pop_layer();
-    let cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+    let cfg = config::get_config().unwrap();
     let pin = EditView::new().content(cfg.pin).with_name("pin-input");
     let last_name = EditView::new()
         .content(cfg.last_name)
@@ -260,7 +261,7 @@ pub fn grades_settings(s: &mut Cursive) {
     .button("Применить", |s| {
         let pin = s.find_name::<EditView>("pin-input").unwrap();
         let last_name = s.find_name::<EditView>("last_name_input").unwrap();
-        let mut cfg: LoungeConfig = confy::load("lounge-tui", None).unwrap();
+        let mut cfg = config::get_config().unwrap();
         cfg.pin = pin.get_content().to_string();
         cfg.last_name = last_name.get_content().to_string();
         let _ = confy::store("lounge-tui", None, cfg);

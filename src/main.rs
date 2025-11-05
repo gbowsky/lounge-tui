@@ -1,48 +1,17 @@
-use chrono::Utc;
 use confy::ConfyError;
-use cursive::{self, theme::Theme};
-use serde_derive::{Deserialize, Serialize};
-
+use cursive::{self};
 mod requests;
 mod tui;
+mod config;
 
 use rust_i18n::t;
 
 rust_i18n::i18n!();
 
-// Init translations for current crate.
-// This will load Configuration using the `[package.metadata.i18n]` section in `Cargo.toml` if exists.
-// Or you can pass arguments by `i18n!` to override it.
-
-#[derive(Serialize, Deserialize)]
-pub struct LoungeConfig {
-    group_id: String,
-    level_id: String,
-    pin: String,
-    last_name: String,
-    setup_passed: bool,
-    selected_date: i64,
-    theme: u8,
-}
-
-impl ::std::default::Default for LoungeConfig {
-    fn default() -> Self {
-        Self {
-            group_id: "".to_string(),
-            level_id: "".to_string(),
-            pin: "".to_string(),
-            last_name: "".to_string(),
-            setup_passed: false,
-            selected_date: Utc::now().timestamp(),
-            theme: 0,
-        }
-    }
-}
-
 fn main() {
     rust_i18n::set_locale("ru");
+    let cfg: Result<config::LoungeConfig, ConfyError> = config::get_config();
 
-    let cfg: Result<LoungeConfig, ConfyError> = confy::load("lounge-tui", None);
     let mut siv = cursive::default();
     siv.set_window_title(t!("app_name"));
 

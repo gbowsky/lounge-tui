@@ -2,7 +2,7 @@ use confy::ConfyError;
 use cursive::{Cursive, event::Event, menu::Tree, views::Dialog};
 use rust_i18n::t;
 
-use crate::LoungeConfig;
+use crate::config::{self, LoungeConfig};
 mod grades;
 mod schedules;
 pub mod setup;
@@ -82,15 +82,15 @@ pub fn error(s: &mut Cursive, error: ConfyError) {
                 .to_owned()
                 + &error.to_string()
                 + "\n"
-                + confy::get_configuration_file_path("lounge-tui", None)
+                + config::get_store_path()
                     .unwrap()
                     .to_str()
                     .unwrap(),
         )
         .title("Ошибка")
         .button("Выход", |s| s.quit())
-        .button("Сброс настроек (программа перезапустится)", |s| {
-            let _ = confy::store("lounge-tui", None, LoungeConfig::default());
+        .button("Сброс настроек (программа закроется)", |s| {
+            let _ = config::store_config(LoungeConfig::default());
             s.quit();
         }),
     );
