@@ -80,7 +80,7 @@ pub fn select_date(s: &mut Cursive) {
             .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap())
             .unwrap()
             .timestamp();
-        config::store_config(cfg);
+        config::store_config(cfg).unwrap();
         siv.pop_layer();
 
         tui::main_screen(siv);

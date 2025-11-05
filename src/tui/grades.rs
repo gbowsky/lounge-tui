@@ -1,3 +1,4 @@
+use cursive::theme::{BaseColor, ColorStyle, ColorType, PaletteStyle};
 use cursive::view::Nameable;
 use cursive::{
     align::Align,
@@ -7,17 +8,14 @@ use cursive::{
 use tokio::runtime::Runtime;
 
 use crate::config;
-use crate::{
-    requests::{
-        self,
-        grades::{GradeResult, GradeType},
-    },
+use crate::requests::{
+    self,
+    grades::{GradeResult, GradeType},
 };
 
 use rust_i18n::t;
 
 rust_i18n::i18n!();
-
 
 fn grade_type_to_string(grade_type: &GradeType) -> String {
     return t!("grades_type.".to_owned() + grade_type.to_string()).to_string();
@@ -25,6 +23,33 @@ fn grade_type_to_string(grade_type: &GradeType) -> String {
 
 fn grade_grade_to_string(grade: &GradeResult) -> String {
     return t!("grades_grade.".to_owned() + grade.to_string()).to_string();
+}
+
+fn grade_grade_color(grade: &GradeResult) -> ColorStyle {
+    let red_style = ColorStyle::new(
+        ColorType::Color(BaseColor::Black.dark()),
+        ColorType::Color(BaseColor::Red.light()),
+    );
+
+    let yellow_style = ColorStyle::new(
+        ColorType::Color(BaseColor::Black.dark()),
+        ColorType::Color(BaseColor::Yellow.light()),
+    );
+
+    let green_style = ColorStyle::new(
+        ColorType::Color(BaseColor::Black.dark()),
+        ColorType::Color(BaseColor::Green.light()),
+    );
+
+    match grade {
+        GradeResult::Absence => red_style,
+        GradeResult::Failed => red_style,
+        GradeResult::Two => red_style,
+        GradeResult::NotAdmitted => red_style,
+        GradeResult::Unknown => yellow_style,
+        GradeResult::Three => yellow_style,
+        _ => green_style,
+    }
 }
 
 pub fn grades_view() -> NamedView<Dialog> {
@@ -45,15 +70,20 @@ pub fn grades_view() -> NamedView<Dialog> {
                         .child(
                             LinearLayout::vertical()
                                 .child(
-                                    TextView::new(grade_type_to_string(&grade.r#type))
-                                        .align(Align::center_right())
-                                        .fixed_width(11),
+                                    TextView::new(format!(
+                                        "{: ^7}",
+                                        &grade_grade_to_string(&grade.grade)
+                                    ))
+                                    .align(Align::top_right())
+                                    .style(grade_grade_color(&grade.grade)),
                                 )
                                 .child(
-                                    TextView::new(grade_grade_to_string(&grade.grade))
-                                        .align(Align::center_right())
-                                        .fixed_width(11),
-                                ),
+                                    TextView::new(grade_type_to_string(&grade.r#type))
+                                        .style(PaletteStyle::Tertiary)
+                                        .align(Align::top_right())
+                                        .fixed_width(12),
+                                )
+                                .child(TextView::new(" ")),
                         );
 
                     grade_list.add_child(grade_item);
