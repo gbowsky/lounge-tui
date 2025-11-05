@@ -51,7 +51,7 @@ pub fn select_theme(s: &mut Cursive) {
         .on_submit(| s: &mut Cursive, item: &u8 | {
             let mut cfg = config::get_config().unwrap();
             cfg.theme = *item;
-            let _ = confy::store("lounge-tui", None, cfg);
+            config::store_config(cfg).unwrap();
             s.pop_layer();
         })
         .selected(cfg.theme.to_usize());
@@ -80,7 +80,7 @@ pub fn select_date(s: &mut Cursive) {
             .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap())
             .unwrap()
             .timestamp();
-        confy::store("lounge-tui", None, cfg).unwrap();
+        config::store_config(cfg);
         siv.pop_layer();
 
         tui::main_screen(siv);
@@ -125,7 +125,7 @@ pub fn some_error(s: &mut Cursive, e: String) {
 fn level_submit(s: &mut Cursive, id: &str) {
     let mut cfg = config::get_config().unwrap();
     cfg.level_id = id.to_string();
-    confy::store("lounge-tui", None, cfg).unwrap();
+    config::store_config(cfg).unwrap();
 
     s.pop_layer();
     setup_group(s);
@@ -161,7 +161,7 @@ fn group_submit(s: &mut Cursive, id: &str) {
     let mut cfg = config::get_config().unwrap();
     cfg.group_id = id.to_string();
     cfg.setup_passed = true;
-    confy::store("lounge-tui", None, cfg).unwrap();
+    config::store_config(cfg).unwrap();
 
     s.pop_layer();
     prompt_grades_setup(s);
@@ -192,7 +192,7 @@ pub fn level_chooser(s: &mut Cursive) {
                 .on_submit(|s: &mut Cursive, v: &str| {
                     let mut cfg = config::get_config().unwrap();
                     cfg.level_id = v.to_string();
-                    confy::store("lounge-tui", None, cfg).unwrap();
+                    config::store_config(cfg).unwrap();
                     s.pop_layer();
                     group_chooser(s);
                 });
@@ -224,7 +224,7 @@ pub fn group_chooser(s: &mut Cursive) {
                 .on_submit(|s, v: &str| {
                     let mut cfg = config::get_config().unwrap();
                     cfg.group_id = v.to_string();
-                    confy::store("lounge-tui", None, cfg).unwrap();
+                    config::store_config(cfg).unwrap();
                     s.pop_layer();
                 });
 
@@ -264,7 +264,7 @@ pub fn grades_settings(s: &mut Cursive) {
         let mut cfg = config::get_config().unwrap();
         cfg.pin = pin.get_content().to_string();
         cfg.last_name = last_name.get_content().to_string();
-        let _ = confy::store("lounge-tui", None, cfg);
+        config::store_config(cfg).unwrap();
         s.pop_layer();
     })
     .dismiss_button(t!("actions.cancel"))

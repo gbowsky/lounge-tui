@@ -90,7 +90,7 @@ pub fn error(s: &mut Cursive, error: ConfyError) {
         .title("Ошибка")
         .button("Выход", |s| s.quit())
         .button("Сброс настроек (программа закроется)", |s| {
-            let _ = config::store_config(LoungeConfig::default());
+            config::store_config(LoungeConfig::default()).unwrap();
             s.quit();
         }),
     );

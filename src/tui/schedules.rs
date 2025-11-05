@@ -127,7 +127,7 @@ pub fn schedules_view() -> NamedView<Dialog> {
                     .child(Button::new(t!("schedules.today"), |s| {
                         let mut cfg = config::get_config().unwrap();
                         cfg.selected_date = Utc::now().timestamp();
-                        confy::store("lounge-tui", None, cfg).unwrap();
+                        config::store_config(cfg).unwrap();
                         tui::main_screen(s);
                         s.add_layer(schedules_view());
                     })),
