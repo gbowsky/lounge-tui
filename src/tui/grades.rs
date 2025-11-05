@@ -120,6 +120,9 @@ pub fn grades_view() -> NamedView<Dialog> {
         semester_list.scrollable(),
     ))
     .title(t!("sections.grades"))
-    .dismiss_button(t!("actions.close"))
+    .button(t!("actions.close"), |s| { 
+        s.set_autohide_menu(false);
+        s.pop_layer();
+    })
     .with_name("grades")
 }

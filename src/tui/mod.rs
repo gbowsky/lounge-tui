@@ -4,7 +4,7 @@ use cursive::{
     align::Align,
     event::Event,
     menu::Tree,
-    view::Resizable,
+    view::{Finder, Resizable},
     views::{Dialog, LinearLayout, TextView},
 };
 use rust_i18n::t;
@@ -26,15 +26,13 @@ pub fn main_screen(s: &mut Cursive) {
     }
 
     s.add_global_callback(Event::Key(cursive::event::Key::F1), |s| {
-        s.pop_layer();
+        s.set_autohide_menu(true);
         s.add_layer(schedules::schedules_view());
+        
     });
     s.add_global_callback(Event::Key(cursive::event::Key::F2), |s| {
-        s.pop_layer();
+        s.set_autohide_menu(true);
         s.add_layer(grades::grades_view());
-    });
-    s.add_global_callback(Event::Key(cursive::event::Key::Esc), |s| {
-        s.select_menubar();
     });
 
     // s.add_layer(
@@ -60,15 +58,15 @@ pub fn main_screen(s: &mut Cursive) {
 
     // MARK: Menubar
     s.menubar().clear();
-    s.menubar().autohide = false;
+    s.set_autohide_menu(false);
     s.menubar()
         .add_leaf(format!("[F1] {}", t!("sections.schedules")), |s| {
-            s.pop_layer();
+            s.set_autohide_menu(true);
             s.add_layer(schedules::schedules_view());
         });
     s.menubar()
         .add_leaf(format!("[F2] {}", t!("sections.grades")), |s| {
-            s.pop_layer();
+            s.set_autohide_menu(true);
             s.add_layer(grades::grades_view());
         });
     s.menubar().add_delimiter();

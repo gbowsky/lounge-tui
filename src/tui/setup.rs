@@ -245,7 +245,6 @@ pub fn group_chooser(s: &mut Cursive) {
 }
 
 pub fn grades_settings(s: &mut Cursive) {
-    s.pop_layer();
     let cfg = config::get_config().unwrap();
     let pin = EditView::new().content(cfg.pin).with_name("pin-input");
     let last_name = EditView::new()

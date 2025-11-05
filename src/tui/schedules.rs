@@ -3,13 +3,13 @@ use std::env;
 use crate::{
     config,
     requests::{self, schedules::LessonUrl, schedules::additional::LessonType},
-    tui::{self, setup},
+    tui::{setup},
 };
 use chrono::{Days, TimeZone, Utc};
 use cursive::{
     Cursive,
     align::Align,
-    theme::{ColorType, Effects, Style},
+    theme::{Effects, Style},
     utils::markup::StyledString,
     view::{Margins, Scrollable},
     views::{Button, Dialog, LinearLayout, NamedView, PaddedView, TextView},
@@ -102,12 +102,6 @@ pub fn schedules_view() -> NamedView<Dialog> {
                             .to_string()
                     } else {
                         t!("online").to_string()
-                    };
-
-                    let place_char = if lesson.additional.online {
-                        "◇ "
-                    } else {
-                        "◆ "
                     };
 
                     let lesson_times = LinearLayout::vertical()
@@ -203,6 +197,9 @@ pub fn schedules_view() -> NamedView<Dialog> {
             .child(schedules_list.scrollable()),
     )
     .title(t!("sections.schedules"))
-    .dismiss_button(t!("actions.close"))
+    .button(t!("actions.close"), |s| { 
+        s.set_autohide_menu(false);
+        s.pop_layer();
+    })
     .with_name("schedules");
 }
