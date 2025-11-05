@@ -63,10 +63,12 @@ pub fn main_screen(s: &mut Cursive) {
     s.menubar().autohide = false;
     s.menubar()
         .add_leaf(format!("[F1] {}", t!("sections.schedules")), |s| {
+            s.pop_layer();
             s.add_layer(schedules::schedules_view());
         });
     s.menubar()
         .add_leaf(format!("[F2] {}", t!("sections.grades")), |s| {
+            s.pop_layer();
             s.add_layer(grades::grades_view());
         });
     s.menubar().add_delimiter();
