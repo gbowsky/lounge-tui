@@ -1,6 +1,6 @@
 # monokai-pro.toml
 # Source palette: Monokai Pro (https://monokai.pro)
-shadow = false
+shadow = true
 borders = "simple"
 
 [colors]

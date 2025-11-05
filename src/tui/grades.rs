@@ -66,7 +66,7 @@ pub fn grades_view() -> NamedView<Dialog> {
 
                 for grade in semester {
                     let grade_item = LinearLayout::horizontal()
-                        .child(TextView::new("■ ".to_owned() + &grade.name).fixed_width(35))
+                        .child(TextView::new("■ ".to_owned() + &grade.name).full_width().max_width(30))
                         .child(
                             LinearLayout::vertical()
                                 .child(
@@ -81,7 +81,9 @@ pub fn grades_view() -> NamedView<Dialog> {
                                     TextView::new(grade_type_to_string(&grade.r#type))
                                         .style(PaletteStyle::Tertiary)
                                         .align(Align::top_right())
-                                        .fixed_width(12),
+                                        .min_width(7)
+                                        .full_width()
+                                        .max_width(19),
                                 )
                                 .child(TextView::new(" ")),
                         );

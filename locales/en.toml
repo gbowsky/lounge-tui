@@ -6,6 +6,12 @@ grades_setup_detailed = "Enter data needed for grades retrieval"
 today = "Today"
 unknown = "Unknown"
 online = "Online"
+ssh_link_hint = "To open a link, hover over it and press Ctrl (Cmd) + LMB\n\n%{url}"
+about = "About program"
+about_description_1 = "Terminal UI software for viewing schedules"
+about_description_2 = "and grades from International Banking Institute"
+about_developer = "Developed by graduate from group \"113\", Grigorii Gorbovskoi"
+about_lol = "Pavlushkov I.V. Straight line in space"
 
 [errors]
 some = "Unexpected error: %{e}"

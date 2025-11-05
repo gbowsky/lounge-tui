@@ -1,5 +1,12 @@
 use confy::ConfyError;
-use cursive::{Cursive, event::Event, menu::Tree, views::Dialog};
+use cursive::{
+    Cursive,
+    align::Align,
+    event::Event,
+    menu::Tree,
+    view::Resizable,
+    views::{Dialog, LinearLayout, TextView},
+};
 use rust_i18n::t;
 
 use crate::config::{self, LoungeConfig};
@@ -30,20 +37,36 @@ pub fn main_screen(s: &mut Cursive) {
         s.select_menubar();
     });
 
-    s.pop_layer();
-    s.clear();
+    // s.add_layer(
+    //     LinearLayout::vertical()
+    //         .child(TextView::new(t!("app_name")).center())
+    //         .child(TextView::new(t!("about_description")))
+    //         .child(TextView::new(t!("about_developer"))).full_screen(),
+    // );
+
+    s.screen_mut().add_transparent_layer(
+        LinearLayout::vertical()
+            .child(
+                TextView::new(include_str!("logo.txt"))
+                    .align(Align::center())
+                    .no_wrap(),
+            )
+            .child(TextView::new(t!("about_description_1")).align(Align::center()))
+            .child(TextView::new(t!("about_description_2")).align(Align::center()))
+            .child(TextView::new(t!("about_developer")).align(Align::center()))
+            .child(TextView::new(format!("\n{}", t!("about_lol"))).align(Align::center()))
+            .full_screen(),
+    );
 
     // MARK: Menubar
     s.menubar().clear();
     s.menubar().autohide = false;
     s.menubar()
         .add_leaf(format!("[F1] {}", t!("sections.schedules")), |s| {
-            s.pop_layer();
             s.add_layer(schedules::schedules_view());
         });
     s.menubar()
         .add_leaf(format!("[F2] {}", t!("sections.grades")), |s| {
-            s.pop_layer();
             s.add_layer(grades::grades_view());
         });
     s.menubar().add_delimiter();
@@ -62,7 +85,8 @@ pub fn main_screen(s: &mut Cursive) {
             setup::select_theme(s);
         });
 
-    s.menubar().add_subtree(format!("{} [▼]", t!("sections.settings")), settings_tree);
+    s.menubar()
+        .add_subtree(format!("[▼] {}", t!("sections.settings")), settings_tree);
 }
 
 pub fn welcome(s: &mut Cursive) {
@@ -82,16 +106,16 @@ pub fn error(s: &mut Cursive, error: ConfyError) {
                 .to_owned()
                 + &error.to_string()
                 + "\n"
-                + config::get_store_path()
-                    .unwrap()
-                    .to_str()
-                    .unwrap(),
+                + config::get_store_path().unwrap().to_str().unwrap(),
         )
         .title("Ошибка")
         .button("Выход", |s| s.quit())
-        .button("Сброс настроек (программа закроется)", |s| {
-            config::store_config(LoungeConfig::default()).unwrap();
-            s.quit();
-        }),
+        .button(
+            "Сброс настроек (программа закроется)",
+            |s| {
+                config::store_config(LoungeConfig::default()).unwrap();
+                s.quit();
+            },
+        ),
     );
 }

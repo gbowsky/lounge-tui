@@ -31,6 +31,9 @@ pub fn load_theme(s: &mut Cursive, theme: &u8) {
         3 => s
             .load_toml(include_str!("themes/catpuccin-latte.toml"))
             .unwrap(),
+        4 => s
+            .load_toml(include_str!("themes/monokai-pro.toml"))
+            .unwrap(),
         _ => s.set_theme(Theme::default()),
     };
 }
@@ -45,6 +48,7 @@ pub fn select_theme(s: &mut Cursive) {
         .item("Monokai", 1)
         .item("Catpuccin Mocha", 2)
         .item("Catpuccin Latte", 3)
+        .item("Monokai Pro", 4)
         .on_select(|s, item| {
             load_theme(s, item);
         })
@@ -82,8 +86,6 @@ pub fn select_date(s: &mut Cursive) {
             .timestamp();
         config::store_config(cfg).unwrap();
         siv.pop_layer();
-
-        tui::main_screen(siv);
 
         siv.add_layer(schedules::schedules_view());
     });

@@ -3,7 +3,7 @@ use chrono::{Duration, NaiveTime};
 use regex::Regex;
 use scraper::{Html, Selector};
 use std::vec;
-mod additional;
+pub mod additional;
 
 pub struct LessonItem {
     pub time_start: String,

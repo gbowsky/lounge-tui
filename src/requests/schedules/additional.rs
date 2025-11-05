@@ -8,6 +8,7 @@ pub struct AdditionalLessonInfo {
     pub r#type: LessonType,
 }
 
+#[derive(Clone, Copy)]
 pub enum LessonType {
     Unknown,
     Practice,
