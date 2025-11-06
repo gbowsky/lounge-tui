@@ -66,7 +66,11 @@ pub fn grades_view() -> NamedView<Dialog> {
 
                 for grade in semester {
                     let grade_item = LinearLayout::horizontal()
-                        .child(TextView::new("■ ".to_owned() + &grade.name).full_width().max_width(30))
+                        .child(
+                            TextView::new("■ ".to_owned() + &grade.name)
+                                .full_width()
+                                .max_width(30),
+                        )
                         .child(
                             LinearLayout::vertical()
                                 .child(
@@ -120,7 +124,7 @@ pub fn grades_view() -> NamedView<Dialog> {
         semester_list.scrollable(),
     ))
     .title(t!("sections.grades"))
-    .button(t!("actions.close"), |s| { 
+    .button(t!("actions.close"), |s| {
         s.set_autohide_menu(false);
         s.pop_layer();
     })

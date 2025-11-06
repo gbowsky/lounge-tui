@@ -174,9 +174,13 @@ fn prompt_grades_setup(s: &mut Cursive) {
         .content(TextView::new(t!("prompts.setup_grades")))
         .title(t!("grades_setup"))
         .button(t!("actions.yes"), |s| {
+            s.pop_layer();
             grades_settings(s);
         })
-        .button(t!("actions.no"), |s| tui::main_screen(s));
+        .button(t!("actions.no"), |s| {
+            s.pop_layer();
+            tui::main_screen(s)
+        });
 
     tui::main_screen(s);
     s.add_layer(dialog);

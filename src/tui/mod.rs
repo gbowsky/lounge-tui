@@ -4,7 +4,7 @@ use cursive::{
     align::Align,
     event::Event,
     menu::Tree,
-    view::{Finder, Resizable},
+    view::{Resizable},
     views::{Dialog, LinearLayout, TextView},
 };
 use rust_i18n::t;
@@ -20,7 +20,6 @@ pub fn main_screen(s: &mut Cursive) {
     for event in [
         Event::Key(cursive::event::Key::F2),
         Event::Key(cursive::event::Key::F1),
-        Event::Key(cursive::event::Key::Esc),
     ] {
         s.clear_global_callbacks(event);
     }
@@ -34,13 +33,6 @@ pub fn main_screen(s: &mut Cursive) {
         s.set_autohide_menu(true);
         s.add_layer(grades::grades_view());
     });
-
-    // s.add_layer(
-    //     LinearLayout::vertical()
-    //         .child(TextView::new(t!("app_name")).center())
-    //         .child(TextView::new(t!("about_description")))
-    //         .child(TextView::new(t!("about_developer"))).full_screen(),
-    // );
 
     s.screen_mut().add_transparent_layer(
         LinearLayout::vertical()
