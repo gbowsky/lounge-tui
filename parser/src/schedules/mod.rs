@@ -1,8 +1,9 @@
-use crate::requests::errors::ErrorCode;
 use chrono::{Duration, NaiveTime};
 use regex::Regex;
 use scraper::{Html, Selector};
 use std::vec;
+
+use crate::errors::ErrorCode;
 pub mod additional;
 
 pub struct LessonItem {

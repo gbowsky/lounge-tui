@@ -1,10 +1,6 @@
 use std::env;
 
-use crate::{
-    config,
-    requests::{self, schedules::LessonUrl, schedules::additional::LessonType},
-    tui::{setup},
-};
+use crate::{config, setup};
 use chrono::{Days, TimeZone, Utc};
 use cursive::{
     Cursive,
@@ -18,11 +14,15 @@ use cursive::{
     theme::{BaseColor, ColorStyle, PaletteStyle},
     view::{Nameable, Resizable},
 };
+use lounge_parser::{
+    get_schedules,
+    schedules::{LessonItem, LessonUrl, additional::LessonType},
+};
 use tokio::runtime::Runtime;
 
 use rust_i18n::t;
 
-rust_i18n::i18n!("locales");
+rust_i18n::i18n!();
 
 fn schedules_additional_type_to_text(text: &str) -> String {
     return t!("schedules_type.".to_owned() + text).to_string();
@@ -71,6 +71,44 @@ fn schedules_type_difficulty_view(r#type: &LessonType) -> LinearLayout {
         .child(TextView::new("║ ").style(color))
 }
 
+fn schedules_lesson_place_str(lesson: &LessonItem) -> String {
+    let lesson_place = if !lesson.additional.online {
+        lesson
+            .additional
+            .classroom.clone()
+            .unwrap_or(t!("unknown").to_string())
+            .to_string()
+    } else {
+        t!("online").to_string()
+    };
+    lesson_place
+}
+
+fn lesson_times_view(lesson: &LessonItem) -> LinearLayout {
+    let lesson_times = LinearLayout::vertical()
+        .child(TextView::new(&lesson.time_start).align(Align::center_right()))
+        .child(
+            TextView::new(&lesson.time_end)
+                .align(Align::center_right())
+                .style(PaletteStyle::Tertiary),
+        );
+    lesson_times
+}
+
+fn lesson_type_place_view(lesson_type: String, lesson_place: String) -> LinearLayout {
+    let lesson_type_place = LinearLayout::horizontal()
+        .child(
+            TextView::new(lesson_type)
+                .style(ColorStyle::new(BaseColor::White, BaseColor::Red)),
+        )
+        .child(TextView::new(" "))
+        .child(
+            TextView::new(lesson_place)
+                .style(ColorStyle::new(BaseColor::White, BaseColor::Blue)),
+        );
+    lesson_type_place
+}
+
 pub fn schedules_view() -> NamedView<Dialog> {
     let mut schedules_list = LinearLayout::vertical();
     let cfg = config::get_config().unwrap();
@@ -79,11 +117,8 @@ pub fn schedules_view() -> NamedView<Dialog> {
     let date_to = date.checked_add_days(Days::new(7)).unwrap();
     let date_to = date_to.format("%d.%m.%Y").to_string();
     let rt = Runtime::new().unwrap();
-    let schedules_result = rt.block_on(requests::get_schedules(
-        &date_from_formatted,
-        &date_to,
-        &cfg.group_id,
-    ));
+    let schedules_result =
+        rt.block_on(get_schedules(&date_from_formatted, &date_to, &cfg.group_id));
 
     match schedules_result {
         Ok(schedules) => {
@@ -93,35 +128,8 @@ pub fn schedules_view() -> NamedView<Dialog> {
                 for lesson in day.lessons {
                     let lesson_type =
                         schedules_additional_type_to_text(&lesson.additional.r#type.to_text());
-
-                    let lesson_place = if !lesson.additional.online {
-                        lesson
-                            .additional
-                            .classroom
-                            .unwrap_or(t!("unknown").to_string())
-                            .to_string()
-                    } else {
-                        t!("online").to_string()
-                    };
-
-                    let lesson_times = LinearLayout::vertical()
-                        .child(TextView::new(&lesson.time_start).align(Align::center_right()))
-                        .child(
-                            TextView::new(&lesson.time_end)
-                                .align(Align::center_right())
-                                .style(PaletteStyle::Tertiary),
-                        );
-
-                    let lesson_type_place = LinearLayout::horizontal()
-                        .child(
-                            TextView::new(lesson_type)
-                                .style(ColorStyle::new(BaseColor::White, BaseColor::Red)),
-                        )
-                        .child(TextView::new(" "))
-                        .child(
-                            TextView::new(lesson_place)
-                                .style(ColorStyle::new(BaseColor::White, BaseColor::Blue)),
-                        );
+                    let lesson_place = schedules_lesson_place_str(&lesson);
+                    let lesson_times = lesson_times_view(&lesson);
 
                     // type & place / text / urls / etc
                     let mut lesson_text = StyledString::new();
@@ -141,7 +149,7 @@ pub fn schedules_view() -> NamedView<Dialog> {
                     }
 
                     let lesson_body: LinearLayout = LinearLayout::vertical()
-                        .child(lesson_type_place)
+                        .child(lesson_type_place_view(lesson_type, lesson_place))
                         .child(TextView::new(lesson_text).full_width().max_width(40))
                         .child(schedules_links_view(lesson.urls).child(TextView::new(" ")));
 
@@ -159,10 +167,7 @@ pub fn schedules_view() -> NamedView<Dialog> {
                     &day.week_day, &day.day, &day.month
                 )));
 
-                schedules_list.add_child(PaddedView::new(
-                    Margins::tb(0, 1),
-                    lesson_list_view,
-                ));
+                schedules_list.add_child(PaddedView::new(Margins::tb(0, 1), lesson_list_view));
             }
         }
         Err(err) => {
@@ -197,7 +202,7 @@ pub fn schedules_view() -> NamedView<Dialog> {
             .child(schedules_list.scrollable()),
     )
     .title(t!("sections.schedules"))
-    .button(t!("actions.close"), |s| { 
+    .button(t!("actions.close"), |s| {
         s.set_autohide_menu(false);
         s.pop_layer();
     })

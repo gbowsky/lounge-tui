@@ -1,7 +1,7 @@
-use std::{env, path::PathBuf};
+use chrono::Utc;
 use confy::ConfyError;
 use serde_derive::{Deserialize, Serialize};
-use chrono::Utc;
+use std::{env, path::PathBuf};
 
 #[derive(Serialize, Deserialize)]
 pub struct LoungeConfig {
@@ -33,10 +33,8 @@ pub fn get_config() -> Result<LoungeConfig, ConfyError> {
         Ok(val) => {
             let val: &str = val.split_whitespace().next().unwrap();
             confy::load("lounge-tui", val)
-        },
-        Err(_e) => {
-            confy::load("lounge-tui", None)
-        },
+        }
+        Err(_e) => confy::load("lounge-tui", None),
     }
 }
 
@@ -45,21 +43,17 @@ pub fn store_config(cfg: LoungeConfig) -> Result<(), ConfyError> {
         Ok(val) => {
             let val: &str = val.split_whitespace().next().unwrap();
             confy::store("lounge-tui", val, cfg)
-        },
-        Err(_e) => {
-            confy::store("lounge-tui", None, cfg)
-        },
+        }
+        Err(_e) => confy::store("lounge-tui", None, cfg),
     }
 }
 
 pub fn get_store_path() -> Result<PathBuf, ConfyError> {
-  match env::var("SSH_CONNECTION") {
+    match env::var("SSH_CONNECTION") {
         Ok(val) => {
             let val: &str = val.split_whitespace().next().unwrap();
             confy::get_configuration_file_path("lounge-tui", val)
-        },
-        Err(_e) => {
-            confy::get_configuration_file_path("lounge-tui", None)
-        },
+        }
+        Err(_e) => confy::get_configuration_file_path("lounge-tui", None),
     }
 }

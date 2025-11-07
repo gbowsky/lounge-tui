@@ -1,0 +1,88 @@
+---
+app_name: IBI Lounge
+welcome: Welcome to IBI Lounge
+grades_setup: Grades setup
+grades_setup_detailed: Enter data needed for grades retrieval
+today: Today
+unknown: Unknown
+online: Online
+ssh_link_hint: To open a link, hover over it and press Ctrl (Cmd) + LMB\n\n%{url}
+about: About program
+about_description_1: Terminal UI software for viewing schedules
+about_description_2: and grades from International Banking Institute
+about_developer: Developed by graduate from group 113, Grigorii Gorbovskoi
+about_lol: Pavlushkov I.V. Straight line in space
+error: Error
+config_reset: Reset settings (app will close)
+
+errors:
+  config: "Unexpected error trying to read configuation file:\n%{e}\n%{path}"
+  some: "Unexpected error: %{e}"
+  grades: "Unexpected error trying to get grades: %{e}"
+  schedules: "Unexpected error trying to get schedules: %{e}"
+
+sections:
+  schedules: Schedules
+  grades: Grades
+  settings: Settings
+
+actions:
+  next: Next
+  back: Back
+  cancel: Cancel
+  yes: Yes
+  no: No
+  apply: Apply
+  close: Close
+  specify_group: Specify group
+  specify_theme: Specify theme
+  specify_level_group: Specify education level and group
+  specify_grades_data: Specify date needed for grade retrieval
+  change_date: Change date
+  exit: Exit
+
+prompts:
+  specify_group: Select group
+  specify_level: Select education level
+  specify_date: Select date
+  specify_theme: Select theme
+  enter_pin: Enter PIN
+  enter_last_name: Enter last name
+  setup_grades: Do you want to enter data needed for grades retrieval?
+
+grades:
+  passed: Passed
+  failed: Failed
+
+grades_type:
+  gov_exam: Gov. exam
+  exam: Exam
+  offline_course_work: Offline course work
+  online_course_work: Online course work
+  subject_report: Subject report
+  subject_report_with_grade: Graded subject report
+  unknown: Unknown
+
+grades_grade:
+  "2": "2"
+  "3": "3"
+  "4": "4"
+  "5": "5"
+  failed: Failed
+  passed: Passed
+  absence: Absent
+  not_admitted: Not admitted
+  unknown: Unknown
+
+schedules:
+  today: Today
+  change_date: Change date
+
+schedules_type:
+  lecture: Lecture
+  practice: Practice
+  meeting: Meeting
+  exam: Exam
+  subject_report: Subject report
+  subject_report_with_grade: Subject report with grade
+  unknown: Unknown

@@ -1,5 +1,6 @@
 {
   "i18n-ally.localesPaths": [
-    "locales"
-  ]
+    "tui/locales"
+  ],
+  "i18n-ally.keystyle": "nested"
 }

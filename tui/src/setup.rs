@@ -12,15 +12,15 @@ use cursive::{
     views::{Dialog, SelectView, TextView},
 };
 use cursive_calendar_view::{CalendarView, EnglishLocale, ViewMode};
+use lounge_parser::get_groups;
 use tokio::runtime::Runtime;
 
 use crate::config;
-use crate::tui::schedules;
-use crate::tui::{self};
-use crate::{requests};
+use crate::main_screen;
+use crate::schedules::schedules_view;
 use rust_i18n::t;
 
-rust_i18n::i18n!("locales");
+rust_i18n::i18n!();
 
 pub fn load_theme(s: &mut Cursive, theme: &u8) {
     match theme {
@@ -52,7 +52,7 @@ pub fn select_theme(s: &mut Cursive) {
         .on_select(|s, item| {
             load_theme(s, item);
         })
-        .on_submit(| s: &mut Cursive, item: &u8 | {
+        .on_submit(|s: &mut Cursive, item: &u8| {
             let mut cfg = config::get_config().unwrap();
             cfg.theme = *item;
             config::store_config(cfg).unwrap();
@@ -60,10 +60,7 @@ pub fn select_theme(s: &mut Cursive) {
         })
         .selected(cfg.theme.to_usize());
 
-    s.add_layer(
-        Dialog::around(select.scrollable())
-            .title(t!("prompts.specify_theme")),
-    );
+    s.add_layer(Dialog::around(select.scrollable()).title(t!("prompts.specify_theme")));
 }
 
 pub fn select_date(s: &mut Cursive) {
@@ -87,7 +84,7 @@ pub fn select_date(s: &mut Cursive) {
         config::store_config(cfg).unwrap();
         siv.pop_layer();
 
-        siv.add_layer(schedules::schedules_view());
+        siv.add_layer(schedules_view());
     });
 
     s.add_layer(Dialog::around(calendar.with_name("calendar")).title(t!("prompts.specify_date")));
@@ -97,7 +94,7 @@ pub fn setup_level(s: &mut Cursive) {
     s.pop_layer();
 
     let rt: Runtime = Runtime::new().unwrap();
-    let levels_result = rt.block_on(requests::get_levels());
+    let levels_result = rt.block_on(lounge_parser::get_levels());
 
     match levels_result {
         Ok(levels) => {
@@ -136,7 +133,7 @@ fn level_submit(s: &mut Cursive, id: &str) {
 fn setup_group(s: &mut Cursive) {
     let cfg = config::get_config().unwrap();
     let rt: Runtime = Runtime::new().unwrap();
-    let groups_result = rt.block_on(requests::get_groups(&cfg.level_id));
+    let groups_result = rt.block_on(get_groups(&cfg.level_id));
 
     match groups_result {
         Ok(groups) => {
@@ -179,16 +176,16 @@ fn prompt_grades_setup(s: &mut Cursive) {
         })
         .button(t!("actions.no"), |s| {
             s.pop_layer();
-            tui::main_screen(s)
+            main_screen(s);
         });
 
-    tui::main_screen(s);
+    main_screen(s);
     s.add_layer(dialog);
 }
 
 pub fn level_chooser(s: &mut Cursive) {
     let rt: Runtime = Runtime::new().unwrap();
-    let levels_result = rt.block_on(requests::get_levels());
+    let levels_result = rt.block_on(lounge_parser::get_levels());
 
     match levels_result {
         Ok(levels) => {
@@ -220,7 +217,7 @@ pub fn level_chooser(s: &mut Cursive) {
 pub fn group_chooser(s: &mut Cursive) {
     let cfg = config::get_config().unwrap();
     let rt: Runtime = Runtime::new().unwrap();
-    let groups_result = rt.block_on(requests::get_groups(&cfg.level_id));
+    let groups_result = rt.block_on(lounge_parser::get_groups(&cfg.level_id));
 
     match groups_result {
         Ok(groups) => {

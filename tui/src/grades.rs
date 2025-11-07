@@ -5,13 +5,10 @@ use cursive::{
     view::{Margins, Resizable, Scrollable},
     views::{Dialog, LinearLayout, NamedView, PaddedView, TextView},
 };
+use lounge_parser::grades::{GradeResult, GradeType};
 use tokio::runtime::Runtime;
 
 use crate::config;
-use crate::requests::{
-    self,
-    grades::{GradeResult, GradeType},
-};
 
 use rust_i18n::t;
 
@@ -57,7 +54,7 @@ pub fn grades_view() -> NamedView<Dialog> {
     let cfg = config::get_config().unwrap();
     let (pin, last_name) = (cfg.pin, cfg.last_name);
     let rt = Runtime::new().unwrap();
-    let grades_result = rt.block_on(requests::get_grades(&pin, &last_name));
+    let grades_result = rt.block_on(lounge_parser::get_grades(&pin, &last_name));
 
     match grades_result {
         Ok(semesters) => {

@@ -1,20 +1,24 @@
+mod config;
+mod grades;
+mod schedules;
+mod setup;
+
 use confy::ConfyError;
+use cursive::{self};
+use rust_i18n::t;
+
+rust_i18n::i18n!();
+
 use cursive::{
     Cursive,
     align::Align,
     event::Event,
     menu::Tree,
-    view::{Resizable},
+    view::Resizable,
     views::{Dialog, LinearLayout, TextView},
 };
-use rust_i18n::t;
 
-use crate::config::{self, LoungeConfig};
-mod grades;
-mod schedules;
-pub mod setup;
-
-rust_i18n::i18n!("locales");
+use config::LoungeConfig;
 
 pub fn main_screen(s: &mut Cursive) {
     for event in [
@@ -27,7 +31,6 @@ pub fn main_screen(s: &mut Cursive) {
     s.add_global_callback(Event::Key(cursive::event::Key::F1), |s| {
         s.set_autohide_menu(true);
         s.add_layer(schedules::schedules_view());
-        
     });
     s.add_global_callback(Event::Key(cursive::event::Key::F2), |s| {
         s.set_autohide_menu(true);
@@ -90,24 +93,47 @@ pub fn welcome(s: &mut Cursive) {
     );
 }
 
-pub fn error(s: &mut Cursive, error: ConfyError) {
+pub fn error_dialog(s: &mut Cursive, error: ConfyError) {
     s.pop_layer();
     s.add_layer(
-        Dialog::text(
-            "Произошла ошибка при попытке прочесть или записать конфигурационный файл:\n"
-                .to_owned()
-                + &error.to_string()
-                + "\n"
-                + config::get_store_path().unwrap().to_str().unwrap(),
-        )
-        .title("Ошибка")
-        .button("Выход", |s| s.quit())
+        Dialog::text(t!(
+            "errors.config",
+            e = &error.to_string(),
+            path = config::get_store_path().unwrap().to_str().unwrap()
+        ))
+        .title(t!("error"))
+        .button(t!("actions.exit"), |s| s.quit())
         .button(
-            "Сброс настроек (программа закроется)",
+            t!("config_reset"),
             |s| {
                 config::store_config(LoungeConfig::default()).unwrap();
                 s.quit();
             },
         ),
     );
+}
+
+fn main() {
+    rust_i18n::set_locale("ru");
+    let cfg: Result<config::LoungeConfig, ConfyError> = config::get_config();
+
+    let mut siv = cursive::default();
+    siv.set_window_title(t!("app_name"));
+
+    match cfg {
+        Ok(config) => {
+            setup::load_theme(&mut siv, &config.theme);
+
+            if config.setup_passed {
+                main_screen(&mut siv)
+            } else {
+                welcome(&mut siv)
+            }
+        }
+        Err(error) => {
+            error_dialog(&mut siv, error);
+        }
+    }
+
+    siv.run();
 }
