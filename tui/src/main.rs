@@ -20,6 +20,8 @@ use cursive::{
 
 use config::LoungeConfig;
 
+use crate::{grades::grades_view, schedules::schedules_view};
+
 pub fn main_screen(s: &mut Cursive) {
     for event in [
         Event::Key(cursive::event::Key::F2),
@@ -29,12 +31,14 @@ pub fn main_screen(s: &mut Cursive) {
     }
 
     s.add_global_callback(Event::Key(cursive::event::Key::F1), |s| {
+        let schedules_view = schedules_view(s);
         s.set_autohide_menu(true);
-        s.add_layer(schedules::schedules_view());
+        s.add_layer(schedules_view);
     });
     s.add_global_callback(Event::Key(cursive::event::Key::F2), |s| {
+        let grades_view = grades_view(s);
         s.set_autohide_menu(true);
-        s.add_layer(grades::grades_view());
+        s.add_layer(grades_view);
     });
 
     s.screen_mut().add_transparent_layer(
@@ -56,21 +60,23 @@ pub fn main_screen(s: &mut Cursive) {
     s.set_autohide_menu(false);
     s.menubar()
         .add_leaf(format!("[F1] {}", t!("sections.schedules")), |s| {
+            let schedules_view = schedules_view(s);
             s.set_autohide_menu(true);
-            s.add_layer(schedules::schedules_view());
+            s.add_layer(schedules_view);
         });
     s.menubar()
         .add_leaf(format!("[F2] {}", t!("sections.grades")), |s| {
+            let grades_view = grades_view(s);
             s.set_autohide_menu(true);
-            s.add_layer(grades::grades_view());
+            s.add_layer(grades_view);
         });
     s.menubar().add_delimiter();
 
     let settings_tree = Tree::new()
         .leaf(t!("actions.specify_level_group"), |s| {
-            setup::level_chooser(s)
+            setup::level_chooser(s, false)
         })
-        .leaf(t!("actions.specify_group"), |s| setup::group_chooser(s))
+        .leaf(t!("actions.specify_group"), |s| setup::group_chooser(s, false))
         .delimiter()
         .leaf(t!("actions.specify_grades_data"), |s| {
             setup::grades_settings(s)
@@ -85,11 +91,13 @@ pub fn main_screen(s: &mut Cursive) {
 }
 
 pub fn welcome(s: &mut Cursive) {
-    s.pop_layer();
     s.add_layer(
         Dialog::text(t!("welcome"))
             .title(t!("app_name"))
-            .button(t!("actions.next"), |s| setup::setup_level(s)),
+            .button(t!("actions.next"), |s| {
+                s.pop_layer();
+                setup::level_chooser(s, true);
+            }),
     );
 }
 

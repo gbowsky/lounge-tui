@@ -1,3 +1,4 @@
+use cursive::Cursive;
 use cursive::theme::{BaseColor, ColorStyle, ColorType, PaletteStyle};
 use cursive::view::Nameable;
 use cursive::{
@@ -5,6 +6,7 @@ use cursive::{
     view::{Margins, Resizable, Scrollable},
     views::{Dialog, LinearLayout, NamedView, PaddedView, TextView},
 };
+use cursive_async_view::AsyncView;
 use lounge_parser::grades::{GradeResult, GradeType};
 use tokio::runtime::Runtime;
 
@@ -49,14 +51,12 @@ fn grade_grade_color(grade: &GradeResult) -> ColorStyle {
     }
 }
 
-pub fn grades_view() -> NamedView<Dialog> {
+fn semester_list_view(
+    result: Result<[Vec<lounge_parser::grades::GradeItem>; 8], String>,
+) -> LinearLayout {
     let mut semester_list = LinearLayout::vertical();
-    let cfg = config::get_config().unwrap();
-    let (pin, last_name) = (cfg.pin, cfg.last_name);
-    let rt = Runtime::new().unwrap();
-    let grades_result = rt.block_on(lounge_parser::get_grades(&pin, &last_name));
 
-    match grades_result {
+    match result {
         Ok(semesters) => {
             for (index, semester) in semesters.iter().enumerate() {
                 let mut grade_list = LinearLayout::vertical();
@@ -111,6 +111,23 @@ pub fn grades_view() -> NamedView<Dialog> {
         }
     }
 
+    semester_list
+}
+
+pub fn grades_view(siv: &mut Cursive) -> NamedView<Dialog> {
+    let cfg = config::get_config().unwrap();
+    let (pin, last_name) = (cfg.pin, cfg.last_name);
+
+    let semester_list_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let rt = Runtime::new().unwrap();
+            let grades_result = rt.block_on(lounge_parser::get_grades(&pin, &last_name));
+            Ok(grades_result)
+        },
+        semester_list_view,
+    ); // create 
+
     Dialog::around(PaddedView::new(
         Margins {
             left: 1,
@@ -118,7 +135,7 @@ pub fn grades_view() -> NamedView<Dialog> {
             top: 0,
             bottom: 0,
         },
-        semester_list.scrollable(),
+        semester_list_view.with_width(40).scrollable(),
     ))
     .title(t!("sections.grades"))
     .button(t!("actions.close"), |s| {

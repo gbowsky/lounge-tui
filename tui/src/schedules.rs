@@ -14,9 +14,10 @@ use cursive::{
     theme::{BaseColor, ColorStyle, PaletteStyle},
     view::{Nameable, Resizable},
 };
+use cursive_async_view::AsyncView;
 use lounge_parser::{
     get_schedules,
-    schedules::{LessonItem, LessonUrl, additional::LessonType},
+    schedules::{DayItem, LessonItem, LessonUrl, additional::LessonType},
 };
 use tokio::runtime::Runtime;
 
@@ -75,7 +76,8 @@ fn schedules_lesson_place_str(lesson: &LessonItem) -> String {
     let lesson_place = if !lesson.additional.online {
         lesson
             .additional
-            .classroom.clone()
+            .classroom
+            .clone()
             .unwrap_or(t!("unknown").to_string())
             .to_string()
     } else {
@@ -97,30 +99,18 @@ fn lesson_times_view(lesson: &LessonItem) -> LinearLayout {
 
 fn lesson_type_place_view(lesson_type: String, lesson_place: String) -> LinearLayout {
     let lesson_type_place = LinearLayout::horizontal()
-        .child(
-            TextView::new(lesson_type)
-                .style(ColorStyle::new(BaseColor::White, BaseColor::Red)),
-        )
+        .child(TextView::new(lesson_type).style(ColorStyle::new(BaseColor::White, BaseColor::Red)))
         .child(TextView::new(" "))
         .child(
-            TextView::new(lesson_place)
-                .style(ColorStyle::new(BaseColor::White, BaseColor::Blue)),
+            TextView::new(lesson_place).style(ColorStyle::new(BaseColor::White, BaseColor::Blue)),
         );
     lesson_type_place
 }
 
-pub fn schedules_view() -> NamedView<Dialog> {
+fn schedules_list_view(result: Result<Vec<DayItem>, String>) -> LinearLayout {
     let mut schedules_list = LinearLayout::vertical();
-    let cfg = config::get_config().unwrap();
-    let date = Utc.timestamp(cfg.selected_date, 0);
-    let date_from_formatted = date.format("%d.%m.%Y").to_string();
-    let date_to = date.checked_add_days(Days::new(7)).unwrap();
-    let date_to = date_to.format("%d.%m.%Y").to_string();
-    let rt = Runtime::new().unwrap();
-    let schedules_result =
-        rt.block_on(get_schedules(&date_from_formatted, &date_to, &cfg.group_id));
 
-    match schedules_result {
+    match result {
         Ok(schedules) => {
             for day in schedules {
                 let mut lesson_list_view = LinearLayout::vertical();
@@ -175,36 +165,45 @@ pub fn schedules_view() -> NamedView<Dialog> {
         }
     }
 
-    return Dialog::around(
-        LinearLayout::vertical()
-            .child(PaddedView::new(
-                Margins {
-                    left: 1,
-                    right: 1,
-                    top: 1,
-                    bottom: 1,
-                },
-                LinearLayout::horizontal()
-                    .child(TextView::new(date_from_formatted + " - " + &date_to))
-                    .child(TextView::new(" "))
-                    .child(Button::new(t!("schedules.change_date"), |s| {
-                        setup::select_date(s);
-                    }))
-                    .child(TextView::new(" "))
-                    .child(Button::new(t!("schedules.today"), |s| {
-                        let mut cfg = config::get_config().unwrap();
-                        cfg.selected_date = Utc::now().timestamp();
-                        config::store_config(cfg).unwrap();
-                        s.pop_layer();
-                        s.add_layer(schedules_view());
-                    })),
-            ))
-            .child(schedules_list.scrollable()),
-    )
-    .title(t!("sections.schedules"))
-    .button(t!("actions.close"), |s| {
-        s.set_autohide_menu(false);
-        s.pop_layer();
-    })
-    .with_name("schedules");
+    schedules_list
+}
+
+pub fn schedules_view(siv: &mut Cursive) -> NamedView<Dialog> {
+    let cfg = config::get_config().unwrap();
+    let date = Utc.timestamp(cfg.selected_date, 0);
+    let date_from_formatted = date.format("%d.%m.%Y").to_string();
+    let date_to = date.checked_add_days(Days::new(7)).unwrap();
+    let date_to = date_to.format("%d.%m.%Y").to_string();
+
+    let async_view = AsyncView::new_with_bg_creator(
+        siv,
+        move || {
+            let rt = Runtime::new().unwrap();
+            let schedules_result =
+                rt.block_on(get_schedules(&date_from_formatted, &date_to, &cfg.group_id));
+
+            // enough blocking, let's show the content
+            Ok(schedules_result)
+        },
+        schedules_list_view,
+    ); // create a text view from the string
+
+    return Dialog::around(async_view.with_width(40).scrollable())
+        .title(t!("sections.schedules"))
+        .button(t!("schedules.change_date"), |s| {
+            setup::select_date(s);
+        })
+        .button(t!("schedules.today"), |s| {
+            let mut cfg = config::get_config().unwrap();
+            cfg.selected_date = Utc::now().timestamp();
+            config::store_config(cfg).unwrap();
+            let schedules_view = schedules_view(s);
+            s.pop_layer();
+            s.add_layer(schedules_view);
+        })
+        .button(t!("actions.close"), |s| {
+            s.set_autohide_menu(false);
+            s.pop_layer();
+        })
+        .with_name("schedules");
 }

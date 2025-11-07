@@ -3,7 +3,6 @@ app_name: IBI Lounge
 welcome: Добро пожаловать в IBI Lounge
 grades_setup: Настройка оценок
 grades_setup_detailed: Укажите данные необходимые для получения оценок
-today: Сегодня
 unknown: Неизвестно
 online: Онлайн
 ssh_link_hint: Чтобы открыть ссылку наведитесь на неё и нажмите Ctrl (Cmd) + ЛКМ\n\n%{url}
@@ -38,7 +37,7 @@ actions:
   specify_theme: Указать тему
   specify_level_group: Указать уровень образования и группу
   specify_grades_data: Указать данные для получения оценок
-  change_date: Сменить дату
+  change_date: Сменить начальную дату
   exit: Выйти
 
 prompts:
@@ -49,10 +48,6 @@ prompts:
   enter_pin: Введите ПИН код
   enter_last_name: Введите фамилию
   setup_grades: Хотите ли вы указать данные для получения оценок?
-
-grades:
-  passed: Зачтено
-  failed: Не зачтено
 
 grades_type:
   gov_exam: Гос. экзамен

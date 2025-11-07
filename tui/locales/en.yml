@@ -3,7 +3,6 @@ app_name: IBI Lounge
 welcome: Welcome to IBI Lounge
 grades_setup: Grades setup
 grades_setup_detailed: Enter data needed for grades retrieval
-today: Today
 unknown: Unknown
 online: Online
 ssh_link_hint: To open a link, hover over it and press Ctrl (Cmd) + LMB\n\n%{url}
@@ -38,7 +37,7 @@ actions:
   specify_theme: Specify theme
   specify_level_group: Specify education level and group
   specify_grades_data: Specify date needed for grade retrieval
-  change_date: Change date
+  change_date: Change starting date
   exit: Exit
 
 prompts:
@@ -49,10 +48,6 @@ prompts:
   enter_pin: Enter PIN
   enter_last_name: Enter last name
   setup_grades: Do you want to enter data needed for grades retrieval?
-
-grades:
-  passed: Passed
-  failed: Failed
 
 grades_type:
   gov_exam: Gov. exam

@@ -11,8 +11,8 @@ use cursive::{
     view::Scrollable,
     views::{Dialog, SelectView, TextView},
 };
+use cursive_async_view::AsyncView;
 use cursive_calendar_view::{CalendarView, EnglishLocale, ViewMode};
-use lounge_parser::get_groups;
 use tokio::runtime::Runtime;
 
 use crate::config;
@@ -84,86 +84,11 @@ pub fn select_date(s: &mut Cursive) {
         config::store_config(cfg).unwrap();
         siv.pop_layer();
 
-        siv.add_layer(schedules_view());
+        let schedules_view = schedules_view(siv);
+        siv.add_layer(schedules_view);
     });
 
     s.add_layer(Dialog::around(calendar.with_name("calendar")).title(t!("prompts.specify_date")));
-}
-
-pub fn setup_level(s: &mut Cursive) {
-    s.pop_layer();
-
-    let rt: Runtime = Runtime::new().unwrap();
-    let levels_result = rt.block_on(lounge_parser::get_levels());
-
-    match levels_result {
-        Ok(levels) => {
-            let mut select = SelectView::<String>::new()
-                .h_align(HAlign::Center)
-                .autojump()
-                .on_submit(level_submit);
-
-            for level in levels {
-                select.add_item(level.label, level.id);
-            }
-
-            s.add_layer(Dialog::around(select.scrollable()).title(t!("prompts.specify_level")));
-        }
-        Err(err) => some_error(s, err),
-    }
-}
-
-pub fn some_error(s: &mut Cursive, e: String) {
-    s.pop_layer();
-    s.add_layer(
-        Dialog::around(TextView::new(t!("errors.some", e = e)))
-            .button(t!("actions.exit"), |s| s.quit()),
-    );
-}
-
-fn level_submit(s: &mut Cursive, id: &str) {
-    let mut cfg = config::get_config().unwrap();
-    cfg.level_id = id.to_string();
-    config::store_config(cfg).unwrap();
-
-    s.pop_layer();
-    setup_group(s);
-}
-
-fn setup_group(s: &mut Cursive) {
-    let cfg = config::get_config().unwrap();
-    let rt: Runtime = Runtime::new().unwrap();
-    let groups_result = rt.block_on(get_groups(&cfg.level_id));
-
-    match groups_result {
-        Ok(groups) => {
-            let mut select = SelectView::<String>::new()
-                .h_align(HAlign::Center)
-                .autojump()
-                .on_submit(group_submit);
-
-            for group in groups {
-                select.add_item(group.label, group.id);
-            }
-
-            s.add_layer(
-                Dialog::around(select.scrollable())
-                    .title(t!("prompts.specify_group"))
-                    .button(t!("actions.back"), |s| setup_level(s)),
-            );
-        }
-        Err(err) => some_error(s, err),
-    }
-}
-
-fn group_submit(s: &mut Cursive, id: &str) {
-    let mut cfg = config::get_config().unwrap();
-    cfg.group_id = id.to_string();
-    cfg.setup_passed = true;
-    config::store_config(cfg).unwrap();
-
-    s.pop_layer();
-    prompt_grades_setup(s);
 }
 
 fn prompt_grades_setup(s: &mut Cursive) {
@@ -183,66 +108,119 @@ fn prompt_grades_setup(s: &mut Cursive) {
     s.add_layer(dialog);
 }
 
-pub fn level_chooser(s: &mut Cursive) {
-    let rt: Runtime = Runtime::new().unwrap();
-    let levels_result = rt.block_on(lounge_parser::get_levels());
+fn level_select_view(result: Result<Vec<lounge_parser::lists::BasicItem>, String>, is_setup: bool) -> Dialog {
+    let mut dialog = Dialog::new()
+        .title(t!("prompts.specify_level"))
+        .dismiss_button(t!("actions.cancel"));
 
-    match levels_result {
+    match result {
         Ok(levels) => {
             let mut select = SelectView::<String>::new()
                 .h_align(HAlign::Center)
                 .autojump()
-                .on_submit(|s: &mut Cursive, v: &str| {
+                .on_submit(move |s: &mut Cursive, v: &str| {
                     let mut cfg = config::get_config().unwrap();
                     cfg.level_id = v.to_string();
                     config::store_config(cfg).unwrap();
                     s.pop_layer();
-                    group_chooser(s);
+                    group_chooser(s, is_setup);
                 });
 
             for level in levels {
                 select.add_item(level.label, level.id);
             }
 
-            s.add_layer(
-                Dialog::around(select.scrollable())
-                    .title(t!("prompts.specify_level"))
-                    .dismiss_button(t!("actions.cancel")),
-            );
+            if is_setup {
+                dialog.remove_button(0);
+            }
+
+            dialog.set_content(select.scrollable());
         }
-        Err(err) => some_error(s, err),
+        Err(err) => {
+            dialog.set_content(TextView::new(t!("errors.some", e = err)));
+        }
     }
+
+    dialog
 }
 
-pub fn group_chooser(s: &mut Cursive) {
-    let cfg = config::get_config().unwrap();
-    let rt: Runtime = Runtime::new().unwrap();
-    let groups_result = rt.block_on(lounge_parser::get_groups(&cfg.level_id));
+pub fn level_chooser(s: &mut Cursive, is_setup: bool) {
+    let async_view = AsyncView::new_with_bg_creator(
+        s,
+        move || {
+            let rt: Runtime = Runtime::new().unwrap();
+            let levels_result = rt.block_on(lounge_parser::get_levels());
 
-    match groups_result {
+            // enough blocking, let's show the content
+            Ok(levels_result)
+        },
+        move |result| level_select_view(result, is_setup),
+    ); // create a text view from the string
+
+    s.add_layer(async_view.with_width(40));
+}
+
+fn group_select_view(result: Result<Vec<lounge_parser::lists::BasicItem>, String>, is_setup: bool) -> Dialog {
+    let mut dialog = Dialog::new()
+        .title(t!("prompts.specify_group"))
+        .dismiss_button(t!("actions.cancel"));
+
+    match result {
         Ok(groups) => {
             let mut select = SelectView::<String>::new()
                 .h_align(HAlign::Center)
                 .autojump()
-                .on_submit(|s, v: &str| {
+                .on_submit(move |s, v: &str| {
                     let mut cfg = config::get_config().unwrap();
                     cfg.group_id = v.to_string();
-                    config::store_config(cfg).unwrap();
                     s.pop_layer();
+
+                    if is_setup {
+                        cfg.setup_passed = true;
+                        prompt_grades_setup(s);
+                    }
+
+                    config::store_config(cfg).unwrap();
                 });
 
             for group in groups {
                 select.add_item(group.label, group.id);
             }
 
-            s.add_layer(
-                Dialog::around(select.scrollable())
-                    .title(t!("prompts.specify_group"))
-                    .dismiss_button(t!("actions.cancel")),
-            );
+            if is_setup {
+                dialog.remove_button(0);
+
+                dialog.add_button(t!("actions.back"), move |s| {
+                    s.pop_layer();
+                    level_chooser(s, is_setup);
+                });
+            }
+
+            dialog.set_content(select.scrollable());
         }
-        Err(err) => some_error(s, err),
+        Err(err) => {
+            dialog.set_content(TextView::new(t!("errors.some", e = err)));
+        }
     }
+
+    dialog
+}
+
+pub fn group_chooser(s: &mut Cursive, is_setup: bool) {
+    let cfg = config::get_config().unwrap();
+    let async_view = AsyncView::new_with_bg_creator(
+        s,
+        move || {
+            let rt: Runtime = Runtime::new().unwrap();
+            let groups_result = rt.block_on(lounge_parser::get_groups(&cfg.level_id));
+
+            // enough blocking, let's show the content
+            Ok(groups_result)
+        },
+        move |result| group_select_view(result, is_setup),
+    ); // create a text view from the string
+
+    s.add_layer(async_view.with_width(40));
 }
 
 pub fn grades_settings(s: &mut Cursive) {
